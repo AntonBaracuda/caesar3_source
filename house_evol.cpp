@@ -12,15 +12,15 @@ void __cdecl fun_decayService_culture()
     {
       if ( buildings[i].house_size )
       {
-        if ( _LOBYTE(buildings[i].house_theater_amphi) <= 1 )
-          _LOBYTE(buildings[i].house_theater_amphi) = 0;
+        if ( _LOBYTE(buildings[i].house_theater_amphi_wine) <= 1 )
+          _LOBYTE(buildings[i].house_theater_amphi_wine) = 0;
         else
-          --_LOBYTE(buildings[i].house_theater_amphi);
+          --_LOBYTE(buildings[i].house_theater_amphi_wine);
 
-        if ( _HIBYTE(buildings[i].house_theater_amphi) <= 1 )
-          _HIBYTE(buildings[i].house_theater_amphi) = 0;
+        if ( _HIBYTE(buildings[i].house_theater_amphi_wine) <= 1 )
+          _HIBYTE(buildings[i].house_theater_amphi_wine) = 0;
         else
-          --_HIBYTE(buildings[i].house_theater_amphi);
+          --_HIBYTE(buildings[i].house_theater_amphi_wine);
 
         if ( _LOBYTE(buildings[i].house_amphiGlad_colo) <= 1 )
           _LOBYTE(buildings[i].house_amphiGlad_colo) = 0;
@@ -243,17 +243,17 @@ void fun_determineHouseEvolveText(int buildingId)
     }
     if ( reqHealth <= building_70_house_health[128 * buildingId] )
     {
-      if ( model_houses[v19].oil > building_54_house_oil[64 * buildingId] )
+      if ( model_houses[v19].oil > buildings[buildingId].house_oil )
       {
         _HIBYTE(buildings[buildingId].wharf_hasBoat_house_evolveStatusDesir) = 27;
         return;
       }
-      if ( model_houses[v19].furniture > building_56_house_furniture[64 * buildingId] )
+      if ( model_houses[v19].furniture > buildings[buildingId].house_furniture )
       {
         _HIBYTE(buildings[buildingId].wharf_hasBoat_house_evolveStatusDesir) = 28;
         return;
       }
-      if ( reqWine > building_52_house_wine[64 * buildingId] )
+      if ( reqWine > buildings[buildingId].house_wine )
       {
         _HIBYTE(buildings[buildingId].wharf_hasBoat_house_evolveStatusDesir) = 29;
         return;
@@ -368,11 +368,11 @@ LABEL_154:
             {
               if ( v9 <= building_70_house_health[128 * buildingId] )
               {
-                if ( model_houses[v20].oil <= building_54_house_oil[64 * buildingId] )
+                if ( model_houses[v20].oil <= buildings[buildingId].house_oil )
                 {
-                  if ( model_houses[v20].furniture <= building_56_house_furniture[64 * buildingId] )
+                  if ( model_houses[v20].furniture <= buildings[buildingId].house_furniture )
                   {
-                    if ( v5 <= building_52_house_wine[64 * buildingId] )
+                    if ( v5 <= buildings[buildingId].house_wine )
                     {
                       if ( v5 <= 1 || city_inform[ciid].numWineTypesAvailable[0] >= 2 )
                       {

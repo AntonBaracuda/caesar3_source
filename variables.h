@@ -15,7 +15,6 @@ static char building_64_house_clinic[__TD_TR]; // weak
 static char map_char_to_fontGraphic[0xff]; // idb
 static char building_01_ciid[__TD_TR]; // weak
 static char building_02_byte_always0[__TD_TR]; // weak
-static char building_03_size[__TD_TR]; // weak
 static char building_04_house_isMerged[__TD_TR]; // weak
 
 static int mouseover_last_update; // weak
@@ -24,8 +23,6 @@ static int mouseover_info_id; // idb
 static char aC3_sg2[7]; // weak
 
 static C3Graphic c3_sg2[0xff];
-
-static unsigned char building__07_y[__TD_TR];
 
 static char building_0e_byte_94BD4E[__TD_TR]; // weak
 static short building_10_placedSequenceNumber[__TD_TR]; // weak
@@ -39,12 +36,6 @@ static short building_42_word_94BD82[__TD_TR]; // weak
 static char building_44_byte_94BD84[__TD_TR]; // weak
 static char building_45_byte_94BD85[__TD_TR]; // weak
 static char building_46_house_taxcollector[__TD_TR]; // weak
-static short building_48_word_94BD88[__TD_TR]; // weak
-
-static short building_50_word_94BD90[__TD_TR]; // weak
-static short building_52_house_wine[__TD_TR]; // weak
-static short building_54_house_oil[__TD_TR]; // weak
-static short building_56_house_furniture[__TD_TR]; // weak
 
 static int setting_map_camera_x; // weak
 static int setting_map_camera_y; // weak
@@ -1079,8 +1070,9 @@ static Walker walkers[1000];
 struct Building
 {
  BuildingType type;
- int d7d_storageId;
+ int storageId;
  int x;
+ int y;
 
  unsigned char inUse;
  int house_crimeRisk;
@@ -1114,16 +1106,22 @@ struct Building
  short fireRisk;
  short damageRisk;
  short industry_outputGood;
- short house_theater_amphi;
+ short house_theater_amphi_wine;
  short house_amphiGlad_colo;
  short house_coloLion_hippo;
  short house_school_library;
  short house_academy_barber;
  short granary_capacity[4];
- short word_94BD8E;
+ short house_wheat;
  short gridOffset;
  short wharf_hasBoat_house_evolveStatusDesir;
  short house_pottery;
+ short house_oil;
+ short house_furniture;
+ short house_wine;
+ short house_vegetables;
+ short size;
+ short formationId;
 };
 
 static const int MAX_BUILDINGS = 2000;
@@ -1171,6 +1169,20 @@ int prosperity;
 int numPeople;
 int tax;
 };
+
+struct ModelBuilding
+{
+  short cost;
+  int desirability;
+  int des_step;
+  int des_stepSize;
+  int des_range;
+  unsigned int laborers;
+  int dword_5F6DD4;
+  int dword_5F7814;
+};
+
+static ModelBuilding model_buildings[100];
 
 struct Empire
 {

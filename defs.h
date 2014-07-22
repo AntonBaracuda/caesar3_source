@@ -343,6 +343,7 @@ G_Denarii        = 16,
 G_Troops         = 17
 };
 
+static const int GoodCount = 16;
 
 enum WindowType
 {
@@ -727,6 +728,13 @@ short warningboxWidth ;
 int time           ;
 short unused         ;
 char text[102]        ;
+};
+
+enum WarningMessage
+{
+  warnMesNoWorkers=17,
+  warnMesNoMarkets=19,
+  warnMesNoActors=44
 };
 
 

@@ -110,7 +110,7 @@ int  fun_getCharWidth(unsigned __int8 c, int fontId)
   return result;
 }
 
-int  fun_strToInt(char *str)
+int  strToInt(char *str)
 {
   int result; // eax@11
   char *ptr; // [sp+4Ch] [bp-14h]@1
