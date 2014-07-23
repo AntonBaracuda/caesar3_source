@@ -1394,8 +1394,6 @@ static __int16 word_7FA386[0xff]; // weak
 static char byte_7FA388[0xff]; // weak
 static char byte_7FA389[0xff]; // weak
 
-static __int16 walker_migrantDestinationHome[0xff]; // weak
-
 static char byte_7FA392[0xff]; // weak
 static char byte_7FA393[0xff]; // weak
 static char walker_migrantNumPeopleCarried[0xff]; // weak
@@ -3847,7 +3845,7 @@ void  fun_handleFireCollapseEvent();
 void  fun_enemyHitBuilding(int gridOffset, signed int maxDamage); // idb
 void  fun_destroyBuildingByEnemyAt(int x, int y, int mapOffset);
 void  sub_467A70(int a1, int a2);
-void  sub_467C40();
+void  checkBurningRuins();
 int  sub_4680A0(int a1, int a2);
 void  checkCrimeAndGenerateCriminal();
 void  fun_generateRioter(int buildingId); // idb
@@ -32901,7 +32899,7 @@ void  fun_doGameTick()
               sub_44BE70();
               break;
             case 43:
-              sub_467C40();
+              checkBurningRuins();
               break;
             case 44:
               fun_handleFireCollapseEvent();
@@ -35593,9 +35591,9 @@ void  sub_453AA0()
   {
     if ( buildings[i].inUse == 1 || buildings[i].inUse == 3 )
     {
-      if ( building_10_placedSequenceNumber[64 * i] > lastPlaced )
+      if ( buildings[i].placedSequenceNumber > lastPlaced )
       {
-        lastPlaced = building_10_placedSequenceNumber[64 * i];
+        lastPlaced = buildings[i].placedSequenceNumber;
         buildingId = i;
       }
     }
@@ -36032,7 +36030,7 @@ void  fun_immigratePeopleToHouse(int buildingId, char numPeople)
                city_inform[ciid].entry_y,
                0);
   walkers[walkerId].actionState = 1;
-  walker_migrantDestinationHome[64 * walkerId] = buildingId;
+  walkers[walkerId].migrantDestinationHome = buildingId;
   buildings[buildingId].immigrantId = walkerId;
   walkers[walkerId].word_7FA366 = (building_45_byte_94BD85[128 * buildingId] & 0x7F) + 10;
   walker_migrantNumPeopleCarried[128 * walkerId] = numPeople;
@@ -36429,13 +36427,12 @@ void  fun_reallocateWorkersPerCategory()
 
 void  sub_456230()
 {
-  __int16 v0; // [sp+50h] [bp-10h]@1
   int category; // [sp+58h] [bp-8h]@6
   signed int i; // [sp+5Ch] [bp-4h]@1
 
-  v0 = getPercentage(100, city_inform[ciid].labor_categoryWater_priority);
+  short effectivity = getPercentage(100, city_inform[ciid].labor_categoryWater_priority);
   getPercentage(100, city_inform[ciid].dword_652AF8 );
-  for ( i = 1; i < 2000; ++i )
+  for ( i = 1; i < MAX_BUILDINGS; ++i )
   {
     if ( buildings[i].inUse == 1 )
     {
@@ -36444,13 +36441,13 @@ void  sub_456230()
       {
         if ( category == LaborCategory_Water )
         {
-          building_14_word_94BD54[64 * i] = v0;
+          buildings[i].workersEffectivity = effectivity;
         }
         else
         {
-          building_14_word_94BD54[64 * i] = 0;
+          buildings[i].workersEffectivity = 0;
           if ( buildings[i].walkerServiceAccess )
-            building_14_word_94BD54[64 * i] = getPercentage(
+            buildings[i].workersEffectivity = getPercentage(
                                                 100 * buildings[i].walkerServiceAccess,
                                                 city_inform[ciid].labor_category_priority[category].relatedToEmployeeAccess);
         }
@@ -36486,13 +36483,13 @@ void  sub_4563A0()
             if ( fun_isIndustryForBuildingEnabled(buildingId) )
               continue;
 LABEL_25:
-            if ( building_14_word_94BD54[64 * buildingId] > 0 )
+            if ( buildings[buildingId].workersEffectivity > 0 )
             {
               if ( v2[v3] )
               {
                 v1 = fun_adjustWithPercentage(
                        city_inform[ciid].labor_category_priority[v3].workersAllocated,
-                       building_14_word_94BD54[64 * buildingId]) / 100;
+                       buildings[buildingId].workersEffectivity) / 100;
 
                 if ( v1 >= model_buildings[buildings[buildingId].type].laborers )
                   v1 = model_buildings[buildings[buildingId].type].laborers;
@@ -36549,7 +36546,7 @@ LABEL_45:
           continue;
         }
       }
-      if ( building_14_word_94BD54[64 * buildingId] > 0 )
+      if ( buildings[buildingId].workersEffectivity > 0 )
       {
         if ( v2[v3] )
         {
@@ -36606,7 +36603,7 @@ void  sub_456910()
       if ( laborCategoryForBuildingId[buildings[v4].type] == 3 )
       {
         buildings[v4].num_workers = 0;
-        if ( building_14_word_94BD54[64 * v4] > 0 )
+        if ( buildings[v4].workersEffectivity > 0 )
         {
           if ( v2 > 0 )
           {
@@ -39640,7 +39637,7 @@ void  fun_generateWalkersForBuildings()
                   v95 = sub_45A040(i);
                   if ( v95 > -1 )
                   {
-                    v88 = spawnWalker(building_01_ciid[128 * i], Walker_Warehouseman, walkerGridX, walkerGridY, 4);
+                    v88 = spawnWalker( buildings[i].cityId, Walker_Warehouseman, walkerGridX, walkerGridY, 4);
                     walkers[v88].actionState = 50;
                     byte_7FA34B[128 * v88] = v95;
                     if ( !v95 )
@@ -39664,7 +39661,7 @@ void  fun_generateWalkersForBuildings()
                   v96 = sub_45A8D0(i);
                   if ( v96 > -1 )
                   {
-                    v2 = spawnWalker(building_01_ciid[128 * i], Walker_Warehouseman, walkerGridX, walkerGridY, 4);
+                    v2 = spawnWalker(buildings[i].cityId, Walker_Warehouseman, walkerGridX, walkerGridY, 4);
                     walkers[v2].actionState = 50;
                     byte_7FA34B[128 * v2] = v96;
                     buildings[i].walkerId = v2;
@@ -39690,7 +39687,7 @@ void  fun_generateWalkersForBuildings()
                     if ( buildings[i].walkerId )
                     {
                       sentryId = spawnWalker(
-                                   building_01_ciid[128 * i],
+                                   buildings[i].cityId,
                                    Walker_Ballista,
                                    buildings[i].x,
                                    buildings[i].y,
@@ -39756,7 +39753,7 @@ void  fun_generateWalkersForBuildings()
                 {
                   buildings[i].walkerSpawnDelay = 0;
                   engineerId = spawnWalker(
-                                 building_01_ciid[128 * i],
+                                 buildings[i].cityId,
                                  Walker_Engineer,
                                  walkerGridX,
                                  walkerGridY,
@@ -39816,7 +39813,7 @@ void  fun_generateWalkersForBuildings()
                 if ( (unsigned __int8)buildings[i].walkerSpawnDelay > prefectSpawnDelay )
                 {
                   buildings[i].walkerSpawnDelay = 0;
-                  prefectId = spawnWalker(building_01_ciid[128 * i], Walker_Prefect, walkerGridX, walkerGridY, 0);
+                  prefectId = spawnWalker(buildings[i].cityId, Walker_Prefect, walkerGridX, walkerGridY, 0);
                   walkers[prefectId].actionState = 70;
                   buildings[i].walkerId = prefectId;
                   walkers[prefectId].buildingId = i;
@@ -39878,7 +39875,7 @@ void  fun_generateWalkersForBuildings()
                       {
                         buildings[i].walkerSpawnDelay = 0;
                         actorColonyId = spawnWalker(
-                                          building_01_ciid[128 * i],
+                                          buildings[i].cityId,
                                           Walker_Actor,
                                           walkerGridX,
                                           walkerGridY,
@@ -39938,7 +39935,7 @@ void  fun_generateWalkersForBuildings()
                       {
                         buildings[i].walkerSpawnDelay = 0;
                         gladiatorSchoolId = spawnWalker(
-                                              building_01_ciid[128 * i],
+                                              buildings[i].cityId,
                                               Walker_Gladiator,
                                               walkerGridX,
                                               walkerGridY,
@@ -39997,7 +39994,7 @@ void  fun_generateWalkersForBuildings()
                       if ( (unsigned __int8)buildings[i].walkerSpawnDelay > lionHouseSpawnDelay )
                       {
                         buildings[i].walkerSpawnDelay = 0;
-                        lionHouseId = spawnWalker(building_01_ciid[128 * i], Walker_LionTamer, walkerGridX, walkerGridY, 0);
+                        lionHouseId = spawnWalker(buildings[i].cityId, Walker_LionTamer, walkerGridX, walkerGridY, 0);
                         walkers[lionHouseId].actionState = 90;
                         buildings[i].walkerId = lionHouseId;
                         walkers[lionHouseId].buildingId = i;
@@ -40053,7 +40050,7 @@ void  fun_generateWalkersForBuildings()
                       {
                         buildings[i].walkerSpawnDelay = 0;
                         chariotMakerId = spawnWalker(
-                                           building_01_ciid[128 * i],
+                                           buildings[i].cityId,
                                            Walker_Charioteer,
                                            walkerGridX,
                                            walkerGridY,
@@ -40117,13 +40114,13 @@ void  fun_generateWalkersForBuildings()
                         buildings[i].walkerSpawnDelay = 0;
                         if ( (signed int)(unsigned __int8)building_65_house_bathhouse_dock_numships_entert_days[128 * i] > 0 )
                           v89 = spawnWalker(
-                                  building_01_ciid[128 * i],
+                                  buildings[i].cityId,
                                   Walker_Gladiator,
                                   walkerGridX,
                                   walkerGridY,
                                   0);
                         else
-                          v89 = spawnWalker(building_01_ciid[128 * i], Walker_Actor, walkerGridX, walkerGridY, 0);
+                          v89 = spawnWalker(buildings[i].cityId, Walker_Actor, walkerGridX, walkerGridY, 0);
                         walkers[v89].actionState = 94;
                         buildings[i].walkerId = v89;
                         walkers[v89].buildingId = i;
@@ -40182,7 +40179,7 @@ void  fun_generateWalkersForBuildings()
                       {
                         buildings[i].walkerSpawnDelay = 0;
                         theaterId = spawnWalker(
-                                      building_01_ciid[128 * i],
+                                      buildings[i].cityId,
                                       Walker_Actor,
                                       walkerGridX,
                                       walkerGridY,
@@ -40251,7 +40248,7 @@ void  fun_generateWalkersForBuildings()
                         {
                           buildings[i].walkerSpawnDelay = 0;
                           hippodromeId = spawnWalker(
-                                           building_01_ciid[128 * i],
+                                           buildings[i].cityId,
                                            Walker_Charioteer,
                                            walkerGridX,
                                            walkerGridY,
@@ -40263,7 +40260,7 @@ void  fun_generateWalkersForBuildings()
                           if ( !city_inform[ciid].dword_654624 )
                           {
                             v13 = spawnWalker(
-                                    building_01_ciid[128 * i],
+                                    buildings[i].cityId,
                                     Walker_HippodromeMiniHorses,
                                     buildings[i].x + 2,
                                     buildings[i].y + 1,
@@ -40273,7 +40270,7 @@ void  fun_generateWalkersForBuildings()
                             byte_7FA34B[128 * v13] = 0;
                             byte_7FA389[128 * v13] = 3;
                             v14 = spawnWalker(
-                                    building_01_ciid[128 * i],
+                                    buildings[i].cityId,
                                     Walker_HippodromeMiniHorses,
                                     buildings[i].x + 2,
                                     buildings[i].y + 2,
@@ -40349,14 +40346,14 @@ void  fun_generateWalkersForBuildings()
                         buildings[i].walkerSpawnDelay = 0;
                         if ( (signed int)(unsigned __int8)building_65_house_bathhouse_dock_numships_entert_days[128 * i] > 0 )
                           colosseumId = spawnWalker(
-                                          building_01_ciid[128 * i],
+                                          buildings[i].cityId,
                                           Walker_LionTamer,
                                           walkerGridX,
                                           walkerGridY,
                                           0);
                         else
                           colosseumId = spawnWalker(
-                                          building_01_ciid[128 * i],
+                                          buildings[i].cityId,
                                           Walker_Gladiator,
                                           walkerGridX,
                                           walkerGridY,
@@ -40430,7 +40427,7 @@ void  fun_generateWalkersForBuildings()
                           continue;
                         buildings[i].walkerSpawnDelay = 0;
                         marketLadyId = spawnWalker(
-                                         building_01_ciid[128 * i],
+                                         buildings[i].cityId,
                                          Walker_MarketTrader,
                                          walkerGridX,
                                          walkerGridY,
@@ -40458,7 +40455,7 @@ void  fun_generateWalkersForBuildings()
                         if ( v87 > 0 )
                         {
                           v91 = spawnWalker(
-                                  building_01_ciid[128 * i],
+                                  buildings[i].cityId,
                                   Walker_MarketBuyer,
                                   walkerGridX,
                                   walkerGridY,
@@ -40548,7 +40545,7 @@ void  fun_generateWalkersForBuildings()
                       {
                         buildings[i].walkerSpawnDelay = 0;
                         bathhouseWorkerId = spawnWalker(
-                                              building_01_ciid[128 * i],
+                                              buildings[i].cityId,
                                               Walker_BathhouseWorker,
                                               walkerGridX,
                                               walkerGridY,
@@ -40618,7 +40615,7 @@ void  fun_generateWalkersForBuildings()
                               childX = walkerGridX;
                               childY = walkerGridY;
                               child1Id = spawnWalker(
-                                           building_01_ciid[128 * i],
+                                           buildings[i].cityId,
                                            Walker_SchoolChild,
                                            walkerGridX,
                                            walkerGridY,
@@ -40628,7 +40625,7 @@ void  fun_generateWalkersForBuildings()
                               walkers[child1Id].buildingId = i;
                               fun_roamWalker(child1Id);
                               child2Id = spawnWalker(
-                                           building_01_ciid[128 * i],
+                                           buildings[i].cityId,
                                            Walker_SchoolChild,
                                            childX,
                                            childY,
@@ -40637,7 +40634,7 @@ void  fun_generateWalkersForBuildings()
                               walkers[child2Id].buildingId = i;
                               fun_roamWalker(child2Id);
                               child3Id = spawnWalker(
-                                           building_01_ciid[128 * i],
+                                           buildings[i].cityId,
                                            Walker_SchoolChild,
                                            childX,
                                            childY,
@@ -40646,7 +40643,7 @@ void  fun_generateWalkersForBuildings()
                               walkers[child3Id].buildingId = i;
                               fun_roamWalker(child3Id);
                               child4Id = spawnWalker(
-                                           building_01_ciid[128 * i],
+                                           buildings[i].cityId,
                                            Walker_SchoolChild,
                                            childX,
                                            childY,
@@ -40707,7 +40704,7 @@ void  fun_generateWalkersForBuildings()
                             {
                               buildings[i].walkerSpawnDelay = 0;
                               librarianId = spawnWalker(
-                                              building_01_ciid[128 * i],
+                                              buildings[i].cityId,
                                               Walker_Librarian,
                                               walkerGridX,
                                               walkerGridY,
@@ -40768,7 +40765,7 @@ void  fun_generateWalkersForBuildings()
                             if ( (unsigned __int8)buildings[i].walkerSpawnDelay > academySpawnDelay )
                             {
                               buildings[i].walkerSpawnDelay = 0;
-                              teacherId = spawnWalker(building_01_ciid[128 * i], Walker_Teacher, walkerGridX, walkerGridY, 0);
+                              teacherId = spawnWalker(buildings[i].cityId, Walker_Teacher, walkerGridX, walkerGridY, 0);
                               walkers[teacherId].actionState = 125;
                               buildings[i].walkerId = teacherId;
                               walkers[teacherId].buildingId = i;
@@ -40826,7 +40823,7 @@ void  fun_generateWalkersForBuildings()
                             {
                               buildings[i].walkerSpawnDelay = 0;
                               barberId = spawnWalker(
-                                           building_01_ciid[128 * i],
+                                           buildings[i].cityId,
                                            Walker_Barber,
                                            walkerGridX,
                                            walkerGridY,
@@ -40888,7 +40885,7 @@ void  fun_generateWalkersForBuildings()
                             {
                               buildings[i].walkerSpawnDelay = 0;
                               doctorId = spawnWalker(
-                                           building_01_ciid[128 * i],
+                                           buildings[i].cityId,
                                            Walker_Doctor,
                                            walkerGridX,
                                            walkerGridY,
@@ -40950,7 +40947,7 @@ void  fun_generateWalkersForBuildings()
                             {
                               buildings[i].walkerSpawnDelay = 0;
                               surgeonId = spawnWalker(
-                                            building_01_ciid[128 * i],
+                                            buildings[i].cityId,
                                             Walker_Surgeon,
                                             walkerGridX,
                                             walkerGridY,
@@ -40978,7 +40975,7 @@ void  fun_generateWalkersForBuildings()
                                 {
                                   buildings[i].walkerSpawnDelay = 0;
                                   missionaryId = spawnWalker(
-                                                   building_01_ciid[128 * i],
+                                                   buildings[i].cityId,
                                                    Walker_Missionary,
                                                    walkerGridX,
                                                    walkerGridY,
@@ -41041,7 +41038,7 @@ void  fun_generateWalkersForBuildings()
                             {
                               if ( v84 < dockSpawnDelay )
                               {
-                                v93 = spawnWalker(building_01_ciid[128 * i], Walker_Dockman, walkerGridX, walkerGridY, 4);
+                                v93 = spawnWalker(buildings[i].cityId, Walker_Dockman, walkerGridX, walkerGridY, 4);
                                 walkers[v93].actionState = -124;
                                 walkers[v93].buildingId = i;
                                 for ( l = 0; l < 3; ++l )
@@ -41091,7 +41088,7 @@ void  fun_generateWalkersForBuildings()
                                 buildings[i].walkerSpawnDelay = 0;
                                 buildings[i].house_pottery= 0;
                                 buildings[i].industry_outputGood = 6;
-                                v30 = spawnWalker(building_01_ciid[128 * i], Walker_CartPusher, walkerGridX, walkerGridY, 4);
+                                v30 = spawnWalker(buildings[i].cityId, Walker_CartPusher, walkerGridX, walkerGridY, 4);
                                 walkers[v30].actionState = 20;
                                 byte_7FA34B[128 * v30] = 6;
                                 buildings[i].walkerId = v30;
@@ -41156,7 +41153,7 @@ void  fun_generateWalkersForBuildings()
                                        buildings[i].y,
                                        (unsigned __int8)buildings[i].size) )
                                 {
-                                  v31 = spawnWalker(building_01_ciid[128 * i], Walker_FishingBoat, walkerGridX, walkerGridY, 0);
+                                  v31 = spawnWalker(buildings[i].cityId, Walker_FishingBoat, walkerGridX, walkerGridY, 0);
                                   walkers[v31].actionState = -66;
                                   buildings[i].walkerId = v31;
                                   walkers[v31].buildingId = i;
@@ -41181,7 +41178,7 @@ void  fun_generateWalkersForBuildings()
                                 if ( (signed int)(unsigned __int8)buildings[i].walkerSpawnDelay > 4 )
                                 {
                                   buildings[i].walkerSpawnDelay = 0;
-                                  v32 = spawnWalker(building_01_ciid[128 * i], Walker_IndigenousNative, walkerGridX, walkerGridY, 0);
+                                  v32 = spawnWalker(buildings[i].cityId, Walker_IndigenousNative, walkerGridX, walkerGridY, 0);
                                   walkers[v32].actionState = -98;
                                   buildings[i].walkerId = v32;
                                   walkers[v32].buildingId = i;
@@ -41212,7 +41209,7 @@ void  fun_generateWalkersForBuildings()
                                 if ( (signed int)(unsigned __int8)buildings[i].walkerSpawnDelay > 8 )
                                 {
                                   buildings[i].walkerSpawnDelay = 0;
-                                  v33 = spawnWalker(building_01_ciid[128 * i], Walker_NativeTrader, walkerGridX, walkerGridY, 0);
+                                  v33 = spawnWalker(buildings[i].cityId, Walker_NativeTrader, walkerGridX, walkerGridY, 0);
                                   walkers[v33].actionState = -94;
                                   buildings[i].walkerId = v33;
                                   walkers[v33].buildingId = i;
@@ -41356,7 +41353,7 @@ void  fun_generateWalkersForBuildings()
                         {
                           buildings[i].walkerSpawnDelay = 0;
                           priestId = spawnWalker(
-                                       building_01_ciid[128 * i],
+                                       buildings[i].cityId,
                                        Walker_Priest,
                                        walkerGridX,
                                        walkerGridY,
@@ -41423,7 +41420,7 @@ void  fun_generateWalkersForBuildings()
                   if ( (unsigned __int8)buildings[i].walkerSpawnDelay > taxCollectorSpawnDelay )
                   {
                     buildings[i].walkerSpawnDelay = 0;
-                    taxCollectorId = spawnWalker(building_01_ciid[128 * i], Walker_TaxCollector, walkerGridX, walkerGridY, 0);
+                    taxCollectorId = spawnWalker(buildings[i].cityId, Walker_TaxCollector, walkerGridX, walkerGridY, 0);
                     walkers[taxCollectorId].actionState = 40;
                     buildings[i].walkerId = taxCollectorId;
                     walkers[taxCollectorId].buildingId = i;
@@ -41449,7 +41446,7 @@ void  fun_generateWalkersForBuildings()
               if ( gStockCapacity(i) )
               {
                 sub_4520A0(i);
-                v1 = spawnWalker(building_01_ciid[128 * i], Walker_CartPusher, walkerGridX, walkerGridY, 4);
+                v1 = spawnWalker(buildings[i].cityId, Walker_CartPusher, walkerGridX, walkerGridY, 4);
                 walkers[v1].actionState = 20;
                 byte_7FA34B[128 * v1] = buildings[i].industry_outputGood;
                 buildings[i].walkerId = v1;
@@ -41474,7 +41471,7 @@ void  fun_generateWalkersForBuildings()
             {
               dword_98C58C = 1;
               buildings[i].walkerSpawnDelay = 0;
-              v0 = spawnWalker(building_01_ciid[128 * i], Walker_Patrician, walkerGridX, walkerGridY, 4);
+              v0 = spawnWalker(buildings[i].cityId, Walker_Patrician, walkerGridX, walkerGridY, 4);
               walkers[v0].actionState = 125;
               walkers[v0].buildingId = i;
               fun_roamWalker(v0);
@@ -41553,7 +41550,7 @@ void  fun_generateLaborSeeker(int buildingId)
     {
       x = walkerGridX;
       y = walkerGridY;
-      walkerId = spawnWalker(building_01_ciid[128 * buildingId], Walker_LaborSeeker, walkerGridX, walkerGridY, 0);
+      walkerId = spawnWalker( buildings[buildingId].cityId, Walker_LaborSeeker, walkerGridX, walkerGridY, 0);
       walkers[walkerId].actionState = 125;
       buildings[buildingId].laborSeekerId = walkerId;
       walkers[walkerId].buildingId = buildingId;
@@ -42892,7 +42889,7 @@ void  sub_467A70(int a1, int a2)
   }
 }
 
-void  sub_467C40()
+void  checkBurningRuins()
 {
   __int16 v0; // cx@17
   __int16 v1; // ax@20
@@ -42914,10 +42911,12 @@ void  sub_467C40()
   {
     if ( buildings[i].inUse == 1 && buildings[i].type == B_BurningRuin )
     {
-      if ( building_42_word_94BD82[64 * i] < 0 )
-        building_42_word_94BD82[64 * i] = 0;
-      ++building_42_word_94BD82[64 * i];
-      if ( building_42_word_94BD82[64 * i] > 32 )
+      if ( buildings[i].burningRuinStep< 0 )
+        buildings[i].burningRuinStep= 0;
+
+      ++buildings[i].burningRuinStep;
+
+      if ( buildings[i].burningRuinStep> 32 )
       {
         dword_8E1484 = 0;
         buildings[i].inUse = 4;
@@ -42930,24 +42929,27 @@ void  sub_467C40()
         v3 = 1;
         continue;
       }
+
       if ( !building_79_byte_94BDB9[128 * i] )
       {
         ++dword_98BF18;
         word_98C080[dword_98C024++] = i;
         if ( dword_98C024 >= 500 )
           dword_98C024 = 499;
+
         if ( (unsigned __int8)scn_climate == 2 )
         {
-          v0 = building_42_word_94BD82[64 * i];
+          v0 = buildings[i].burningRuinStep;
           if ( v0 & 3 )
             continue;
         }
         else
         {
-          v1 = building_42_word_94BD82[64 * i];
+          v1 = buildings[i].burningRuinStep;
           if ( v1 & 7 )
             continue;
         }
+
         if ( (building_45_byte_94BD85[128 * i] & 3) == (random_7f_1 & 3) )
         {
           v9 = dword_94BD38 - 1;
@@ -43251,7 +43253,7 @@ void  generateMugger(int buildingId)
            (unsigned __int8)buildings[buildingId].size,
            2) )
     {
-      v1 = spawnWalker(building_01_ciid[128 * buildingId], Walker_Criminal, walkerGridX, walkerGridY, 4);
+      v1 = spawnWalker(buildings[buildingId].cityId, Walker_Criminal, walkerGridX, walkerGridY, 4);
       walkers[v1].word_7FA366 = (building_45_byte_94BD85[128 * buildingId] & 0xF) + 10;
       ++city_inform[ciid].dword_654260;
       if ( city_inform[ciid].finance_taxes_thisyear > 20 )
@@ -43284,7 +43286,7 @@ void  fun_generateProtester(int buildingId)
            (unsigned __int8)buildings[buildingId].size,
            2) )
     {
-      walkers[ spawnWalker(building_01_ciid[128 * buildingId], Walker_Protestor, walkerGridX, walkerGridY, 4)].word_7FA366
+      walkers[ spawnWalker(buildings[buildingId].cityId, Walker_Protestor, walkerGridX, walkerGridY, 4)].word_7FA366
           = (building_45_byte_94BD85[128 * buildingId] & 0xF) + 10;
       ++city_inform[ciid].dword_654260;
     }
@@ -43581,11 +43583,11 @@ int fun_createBuilding(int ciid, BuildingType type, int x, int y)
   }
 
   buildings[buildingId].inUse = 3;
-  building_01_ciid[128 * buildingId] = ciid;
-  building_02_byte_always0[128 * buildingId] = city_inform[ciid].byte_6500A5_always0;
+  buildings[buildingId].cityId = ciid;
+  buildings[buildingId].byte_always0 = city_inform[ciid].byte_6500A5_always0;
   buildings[buildingId].type = type;
   buildings[buildingId].size = LOBYTE(buildingSizes[4 * type]);
-  building_10_placedSequenceNumber[64 * buildingId] = buildingId_placedSequence++;
+  buildings[buildingId].placedSequenceNumber = buildingId_placedSequence++;
   buildings[buildingId].house_crimeRisk = 50;
   buildings[buildingId].word_94BD5A = 0;
   buildings[buildingId].house_size = 0;
@@ -44984,7 +44986,7 @@ void  sub_46E3D0(int buildingId, char a2)
     buildings[buildingId].type = B_BurningRuin;
     buildings[buildingId].towerBallistaId = 0;
     building_74_house_taxIncomeThisYear_senateForum_treasureStore[32 * buildingId] = 0;
-    building_42_word_94BD82[64 * buildingId] = (building_45_byte_94BD85[128 * buildingId] & 7) + 1;
+    buildings[buildingId].burningRuinStep = (building_45_byte_94BD85[128 * buildingId] & 7) + 1;
     building_44_byte_94BD84[128 * buildingId] = 1;
     buildings[buildingId].size = 1;
     building_79_byte_94BDB9[128 * buildingId] = a2;
@@ -45058,7 +45060,7 @@ void  sub_46E3D0(int buildingId, char a2)
         }
       }
       fun_putBuildingOnTerrainAndGraphicGrids(v10, buildings[v10].x, buildings[v10].y, 1, 1, v6, 8);
-      building_42_word_94BD82[64 * v10] = (building_45_byte_94BD85[128 * v10] & 7) + 1;
+      buildings[v10].burningRuinStep = (building_45_byte_94BD85[128 * v10] & 7) + 1;
       buildings[v10].towerBallistaId = 0;
       building_44_byte_94BD84[128 * v10] = 1;
       building_79_byte_94BDB9[128 * v10] = a2;
@@ -60256,7 +60258,7 @@ void  fun_walker_immigrant()
 
   byte_7FA3A2[128 * walkerId] = 0;
   walkers[walkerId].word_7FA346 = 0;
-  buildingId = walker_migrantDestinationHome[64 * walkerId];
+  buildingId = walkers[walkerId].migrantDestinationHome;
   if ( buildings[buildingId].inUse == 1
     && buildings[buildingId].immigrantId == walkerId
     && buildings[buildingId].house_size )
@@ -60495,7 +60497,7 @@ void  fun_walker_homeless()
                  2) )
           {
             buildings[v2].immigrantId = walkerId;
-            walker_migrantDestinationHome[64 * walkerId] = v2;
+            walkers[walkerId].migrantDestinationHome = v2;
             walkers[walkerId].actionState = 8;
             walkers[walkerId].destination_x = walkerGridX;
             walkers[walkerId].destination_y = walkerGridY;
@@ -60519,7 +60521,7 @@ void  fun_walker_homeless()
     case 8:
       byte_7FA395[128 * walkerId] = 0;
       fun_walkerWalkTicks(walkerId, 1);
-      v3 = walker_migrantDestinationHome[64 * walkerId];
+      v3 = walkers[walkerId].migrantDestinationHome;
       if ( walkers[walkerId].direction != 9 && walkers[walkerId].direction != 10 )
       {
         if ( walkers[walkerId].direction == 8 )
@@ -60571,7 +60573,7 @@ void  fun_walker_homeless()
                  2) )
           {
             buildings[v4].immigrantId = walkerId;
-            walker_migrantDestinationHome[64 * walkerId] = v4;
+            walkers[walkerId].migrantDestinationHome = v4;
             walkers[walkerId].actionState = 8;
             walkers[walkerId].destination_x = walkerGridX;
             walkers[walkerId].destination_y = walkerGridY;
@@ -60582,7 +60584,7 @@ void  fun_walker_homeless()
       }
       break;
     case 9:
-      v5 = walker_migrantDestinationHome[64 * walkerId];
+      v5 = walkers[walkerId].migrantDestinationHome;
       walkers[walkerId].byte_7FA34C = 1;
       byte_7FA395[128 * walkerId] = 1;
       if ( sub_4B66E0(walkerId, 1) == 1 )
@@ -61956,11 +61958,11 @@ void  fun_walker_prefect()
              buildings[v3].y);
       if ( buildings[v3].inUse == 1 )
       {
-        if ( buildings[v3].type == 99 )
+        if ( buildings[v3].type == B_BurningRuin )
         {
           if ( v2 < 2 )
           {
-            building_42_word_94BD82[64 * v3] = 32;
+            buildings[v3].burningRuinStep = 32;
             fun_sound_playChannel(157);
           }
           else
@@ -70780,7 +70782,7 @@ void  deleteWalker(int walkerId)
       }
     }
   }
-  if ( walker_migrantDestinationHome[64 * walkerId] )
+  if ( walkers[walkerId].migrantDestinationHome )
     buildings[walkers[walkerId].buildingId].immigrantId = 0;
   fun_removeDestinationPathForWalker(walkerId);
   fun_removeWalkerFromTileList(walkerId);
@@ -71727,7 +71729,7 @@ signed int  fun_createFortFormation(int buildingId)
   formations[formationId].standardY = buildings[buildingId].y - 1;
   formations[formationId].x = buildings[buildingId].x + 3;
   formations[formationId].y = buildings[buildingId].y - 1;
-  flagId = spawnWalker(building_01_ciid[128 * buildingId], Walker_FortStandard, 0, 0, 0);
+  flagId = spawnWalker(buildings[buildingId].cityId, Walker_FortStandard, 0, 0, 0);
   walkers[flagId].buildingId = buildingId;
   walkers[flagId].formationId = formationId;
   formations[formationId].bannerId = flagId;
@@ -71830,7 +71832,7 @@ signed int  fun_generateSoldierFromBarracks(int buildingId)
   if ( formationId > 0 )
   {
     v9 = spawnWalker(
-           building_01_ciid[128 * buildingId],
+           buildings[buildingId].cityId,
            formations[formationId].walkerType,
            walkerGridX,
            walkerGridY,
@@ -71894,7 +71896,7 @@ signed int  fun_generateTowerSentryFromBarracks(int buildingId)
         && (unsigned __int8)building_0e_byte_94BD4E[128 * i] == (unsigned __int8)building_0e_byte_94BD4E[128 * buildingId] )
         break;
     }
-    v3 = spawnWalker(building_01_ciid[128 * buildingId], Walker_TowerSentry, walkerGridX, walkerGridY, 0);
+    v3 = spawnWalker(buildings[buildingId].cityId, Walker_TowerSentry, walkerGridX, walkerGridY, 0);
     walkers[v3].actionState = -82;
     if ( !determineAccessRoad(
             buildings[i].x,
@@ -112335,7 +112337,7 @@ void  fun_drawDebugInfoBuildings()
       fun_drawNumber(buildings[v3].house_population, 64, " = pop", 8, v5 + 84, 27, 16122);
       fun_drawNumber(buildings[v3].industry_unitsStored, 64, " = goods", 100, v5 + 84, 27, 16122);
       fun_drawNumber(buildings[v3].walkerServiceAccess, 64, " = acc", 8, v5 + 96, 27, 16122);
-      fun_drawNumber(building_14_word_94BD54[64 * v3], 64, " = rel", 100, v5 + 96, 27, 16122);
+      fun_drawNumber(buildings[v3].workersEffectivity, 64, " = rel", 100, v5 + 96, 27, 16122);
       fun_drawNumber(buildings[v3].immigrantId, 64, " = immigrant", 8, v5 + 108, 27, 16122);
       if ( buildings[v3].laborSeekerId )
       {
@@ -112580,7 +112582,7 @@ void  fun_drawDebugInfoFigures()
       text_xoffset = 0;
       fun_drawNumber(walkers[dword_608098].buildingId, 64, " = agent_for ", 8, v6 + 84, 27, 16122);
       fun_drawNumber(
-        walker_migrantDestinationHome[64 * dword_608098],
+        walkers[dword_608098].migrantDestinationHome,
         64,
         " = immigrant_to ",
         text_xoffset + 8,

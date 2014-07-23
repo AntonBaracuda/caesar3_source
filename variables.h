@@ -13,8 +13,6 @@
 static char building_64_house_clinic[__TD_TR]; // weak
 
 static char map_char_to_fontGraphic[0xff]; // idb
-static char building_01_ciid[__TD_TR]; // weak
-static char building_02_byte_always0[__TD_TR]; // weak
 static char building_04_house_isMerged[__TD_TR]; // weak
 
 static int mouseover_last_update; // weak
@@ -25,14 +23,10 @@ static char aC3_sg2[7]; // weak
 static C3Graphic c3_sg2[0xff];
 
 static char building_0e_byte_94BD4E[__TD_TR]; // weak
-static short building_10_placedSequenceNumber[__TD_TR]; // weak
-
-static short building_14_word_94BD54[__TD_TR]; // weak
 
 static char building_3c_hasRoadAccess[__TD_TR]; // weak
 static char building_3d_byte_94BD7D[__TD_TR]; // weak
 
-static short building_42_word_94BD82[__TD_TR]; // weak
 static char building_44_byte_94BD84[__TD_TR]; // weak
 static char building_45_byte_94BD85[__TD_TR]; // weak
 static char building_46_house_taxcollector[__TD_TR]; // weak
@@ -1063,6 +1057,7 @@ struct Walker
   short tradeCaravanNextId;
   short itemCollecting;
   char byte_7FA341;
+  short migrantDestinationHome;
 };
 
 static Walker walkers[1000];
@@ -1122,6 +1117,11 @@ struct Building
  short house_vegetables;
  short size;
  short formationId;
+ short placedSequenceNumber;
+ char byte_always0;
+ short cityId;
+ short workersEffectivity;
+ short burningRuinStep;
 };
 
 static const int MAX_BUILDINGS = 2000;
