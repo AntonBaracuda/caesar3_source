@@ -67,10 +67,10 @@ void __cdecl fun_decayService_culture()
         else
           --building_64_house_clinic[128 * i];
 
-        if ( (signed int)(unsigned char)building_65_house_bathhouse_dock_numships_entert_days[128 * i] <= 1 )
-          building_65_house_bathhouse_dock_numships_entert_days[128 * i] = 0;
+        if ( buildings[i].house_bathhouse_dock_numships_entert_days <= 1 )
+          buildings[i].house_bathhouse_dock_numships_entert_days = 0;
         else
-          --building_65_house_bathhouse_dock_numships_entert_days[128 * i];
+          --buildings[i].house_bathhouse_dock_numships_entert_days;
         if ( (signed int)(unsigned char)building_66_house_hospital_entert_days2[128 * i] <= 1 )
           building_66_house_hospital_entert_days2[128 * i] = 0;
         else
@@ -208,7 +208,7 @@ void fun_determineHouseEvolveText(int buildingId)
         }
       }
     }
-    if ( model_houses[v19].bathhouse > (unsigned char)building_65_house_bathhouse_dock_numships_entert_days[128 * buildingId] )
+    if ( model_houses[v19].bathhouse > buildings[buildingId].house_bathhouse_dock_numships_entert_days )
     {
       _HIBYTE(buildings[buildingId].wharf_hasBoat_house_evolveStatusDesir) = 18;
       return;
@@ -339,7 +339,7 @@ void fun_determineHouseEvolveText(int buildingId)
               }
             }
           }
-          if ( model_houses[v20].bathhouse > (unsigned char)building_65_house_bathhouse_dock_numships_entert_days[128 * buildingId] )
+          if ( model_houses[v20].bathhouse > buildings[buildingId].house_bathhouse_dock_numships_entert_days )
           {
             _HIBYTE(buildings[buildingId].wharf_hasBoat_house_evolveStatusDesir) = 48;
             return;

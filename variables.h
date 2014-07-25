@@ -343,7 +343,6 @@ static char *input_text[0xff];
 static char wndproc_closeStatus; // weak
 static char c3mm_index[C3MM_INDEX_SIZE]; // weak
 
-static char building_65_house_bathhouse_dock_numships_entert_days[__TD_TR]; // weak
 static char building_66_house_hospital_entert_days2[__TD_TR]; // weak
 static char building_67_house_ceres[__TD_TR]; // weak
 static char building_68_house_neptune[__TD_TR]; // weak
@@ -1058,6 +1057,21 @@ struct Walker
   short itemCollecting;
   char byte_7FA341;
   short migrantDestinationHome;
+  short word_7FA374;
+  short destinationpathId;
+  char byte_7FA376;
+  char byte_7FA352;
+  short word_7FA3B0;
+  short word_7FA3B2;
+  short word_7FA3B4;
+  short word_7FA3B6;
+  short word_7FA372;
+  short word_7FA35E;
+
+  char cartPusherGoodType;
+  char byte_7FA39C;
+  char byte_7FA39D;
+  char byte_7FA393;
 };
 
 static Walker walkers[1000];
@@ -1122,6 +1136,7 @@ struct Building
  short cityId;
  short workersEffectivity;
  short burningRuinStep;
+ char house_bathhouse_dock_numships_entert_days;
 };
 
 static const int MAX_BUILDINGS = 2000;
