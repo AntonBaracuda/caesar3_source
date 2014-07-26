@@ -10,8 +10,6 @@
 
 #define ANTBCODE
 
-static char building_64_house_clinic[__TD_TR]; // weak
-
 static char map_char_to_fontGraphic[0xff]; // idb
 static char building_04_house_isMerged[__TD_TR]; // weak
 
@@ -299,7 +297,7 @@ static int currentOverlay; // idb
 static int previousOverlay; // weak
 static int dword_608078; // weak
 static int dword_608080; // weak
-static int dword_608084; // weak
+static int canPlayCurrentSound; // weak
 static int dword_608094; // idb
 static int dword_608098; // idb
 static int debug_drawNetworkInfo; // weak
@@ -343,25 +341,15 @@ static char *input_text[0xff];
 static char wndproc_closeStatus; // weak
 static char c3mm_index[C3MM_INDEX_SIZE]; // weak
 
-static char building_66_house_hospital_entert_days2[__TD_TR]; // weak
 static char building_67_house_ceres[__TD_TR]; // weak
-static char building_68_house_neptune[__TD_TR]; // weak
-static char building_69_house_mercury[__TD_TR]; // weak
-static char building_6a_house_mars[__TD_TR]; // weak
-static char building_6b_house_venus[__TD_TR]; // weak
 
-static char building_6e_house_entertainment[__TD_TR]; // weak
-static char building_6f_house_education[__TD_TR]; // weak
 static char building_70_house_health[__TD_TR]; // weak
-static char building_71_house_numGods[__TD_TR]; // weak
 
 static int building_74_house_taxIncomeThisYear_senateForum_treasureStore[__TD_TR]; // weak
 
-static char building_79_byte_94BDB9[__TD_TR]; // weak
 static char building_7a_desirability[__TD_TR]; // weak
-static char building_7b_byte_94BDBB[__TD_TR]; // weak
+
 static char building_7c_adjacentToWater[__TD_TR]; // weak
-static char building_7f_byte_94BDBF[__TD_TR]; // idb
 
 static char current_fileExtension[32];
 
@@ -1033,6 +1021,9 @@ struct Walker
   unsigned char y;
   unsigned char x;
 
+  unsigned char byte_7FA360; //dst_x
+  unsigned char byte_7FA361; //dst_y
+
   int progressOnTile;
 
   int tilePosition_y;
@@ -1072,6 +1063,10 @@ struct Walker
   char byte_7FA39C;
   char byte_7FA39D;
   char byte_7FA393;
+  char reachedLastStep;
+  char maxLevelOrRiskSeen;
+  char byte_7FA3B8;
+  char byte_7FA342;
 };
 
 static Walker walkers[1000];
@@ -1137,6 +1132,18 @@ struct Building
  short workersEffectivity;
  short burningRuinStep;
  char house_bathhouse_dock_numships_entert_days;
+ char byte_94BDBB;
+ char haveProblems;
+ char house_entertainment;
+ char house_numGods;
+ char house_education;
+ char house_clinic;
+ char house_hospital_entert_days2;
+ char house_mercury;
+ char house_neptune;
+ char house_mars;
+ char house_venus;
+ char byte_94BDB9;
 };
 
 static const int MAX_BUILDINGS = 2000;
