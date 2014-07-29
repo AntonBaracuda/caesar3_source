@@ -11,7 +11,6 @@
 #define ANTBCODE
 
 static char map_char_to_fontGraphic[0xff]; // idb
-static char building_04_house_isMerged[__TD_TR]; // weak
 
 static int mouseover_last_update; // weak
 static int mouseover_info_id; // idb
@@ -20,9 +19,6 @@ static char aC3_sg2[7]; // weak
 
 static C3Graphic c3_sg2[0xff];
 
-static char building_0e_byte_94BD4E[__TD_TR]; // weak
-
-static char building_3c_hasRoadAccess[__TD_TR]; // weak
 static char building_3d_byte_94BD7D[__TD_TR]; // weak
 
 static char building_44_byte_94BD84[__TD_TR]; // weak
@@ -299,7 +295,7 @@ static int dword_608078; // weak
 static int dword_608080; // weak
 static int canPlayCurrentSound; // weak
 static int dword_608094; // idb
-static int dword_608098; // idb
+static int currentWalkerGridId; // idb
 static int debug_drawNetworkInfo; // weak
 static int debug_showHappinessProsperityInfo; // weak
 static int sidepanel_collapsed; // weak
@@ -1039,7 +1035,7 @@ struct Walker
   char byte_7FA3A6;
 
   int state;
-  short word_7FA38E; // weak
+  short baseWorkingBuildingId; // weak
   short formationId; // weak
   short word_7FA346;
   char byte_7FA39B;
@@ -1053,7 +1049,7 @@ struct Walker
   char byte_7FA376;
   char byte_7FA352;
   short word_7FA3B0;
-  short word_7FA3B2;
+  short wlk_ID_mm;
   short word_7FA3B4;
   short word_7FA3B6;
   short word_7FA372;
@@ -1067,9 +1063,20 @@ struct Walker
   char maxLevelOrRiskSeen;
   char byte_7FA3B8;
   char byte_7FA342;
+  char byte_7FA3A5;
+  char byte_7FA3A2;
+  char isBoat;
+  char byte_7FA34D;
+  char byte_7FA39F;
+  char byte_7FA3A7;
+  char byte_7FA3A9;
+
+  short word_7FA384;
+  short wlk_ID_pp;
 };
 
-static Walker walkers[1000];
+static const int MAX_WALKERS=1000;
+static Walker walkers[MAX_WALKERS];
 
 struct Building
 {
@@ -1089,9 +1096,9 @@ struct Building
  int level_resourceId;
  int grow_value_house_foodstocks[8];
  short house_roomForPeople;
- short word_94BD5A;
+ short haveRomeroad;
  short house_maxPopEver;
- short word_94BD5E;
+ short noContactWithRome;
  char enter_x;
  char enter_y;
  short walkerId;
@@ -1101,7 +1108,7 @@ struct Building
  char walkerSpawnDelay;
  char byte_94BD6C;
  char hasFountain;
- char byte_94BD6E;
+ char waterDep;
  short warehouse_prevStorage;
  short warehouse_nextStorage;
  short industry_unitsStored;
@@ -1144,6 +1151,9 @@ struct Building
  char house_mars;
  char house_venus;
  char byte_94BDB9;
+ char hasRoadAccess;
+ char haveRoadnet;
+ char house_isMerged;
 };
 
 static const int MAX_BUILDINGS = 2000;
