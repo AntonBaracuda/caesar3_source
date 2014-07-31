@@ -75,10 +75,10 @@ void __cdecl decayService_culture()
           buildings[i].house_hospital_entert_days2 = 0;
         else
           --buildings[i].house_hospital_entert_days2;
-        if ( building_67_house_ceres[128 * i] <= 1 )
-          building_67_house_ceres[128 * i] = 0;
+        if ( buildings[i].house_ceres <= 1 )
+          buildings[i].house_ceres = 0;
         else
-          --building_67_house_ceres[128 * i];
+          --buildings[i].house_ceres;
         if ( buildings[i].house_neptune <= 1 )
           buildings[i].house_neptune = 0;
         else
@@ -126,7 +126,7 @@ void fun_determineHouseEvolveText(int buildingId)
   int v20; // [sp+98h] [bp-4h]@80
 
   v19 = buildings[buildingId].level_resourceId;
-  desirability = building_7a_desirability[128 * buildingId];
+  desirability = buildings[buildingId].desirability;
 
   if ( desirability > model_houses[v19].des_devolve[0] )
     desirabilityMet = desirability >= model_houses[v19].des_evolve;
@@ -243,7 +243,7 @@ void fun_determineHouseEvolveText(int buildingId)
       _HIBYTE(buildings[buildingId].wharf_hasBoat_house_evolveStatusDesir) = 23;
       return;
     }
-    if ( reqHealth <= building_70_house_health[128 * buildingId] )
+    if ( reqHealth <= buildings[buildingId].house_health )
     {
       if ( model_houses[v19].oil > buildings[buildingId].house_oil )
       {
@@ -368,7 +368,7 @@ void fun_determineHouseEvolveText(int buildingId)
 LABEL_154:
             if ( model_houses[v20].barber <= _HIBYTE(buildings[buildingId].house_academy_barber) )
             {
-              if ( v9 <= building_70_house_health[128 * buildingId] )
+              if ( v9 <= buildings[buildingId].house_health )
               {
                 if ( model_houses[v20].oil <= buildings[buildingId].house_oil )
                 {

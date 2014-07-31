@@ -19,12 +19,6 @@ static char aC3_sg2[7]; // weak
 
 static C3Graphic c3_sg2[0xff];
 
-static char building_3d_byte_94BD7D[__TD_TR]; // weak
-
-static char building_44_byte_94BD84[__TD_TR]; // weak
-static char building_45_byte_94BD85[__TD_TR]; // weak
-static char building_46_house_taxcollector[__TD_TR]; // weak
-
 static int setting_map_camera_x; // weak
 static int setting_map_camera_y; // weak
 
@@ -337,15 +331,7 @@ static char *input_text[0xff];
 static char wndproc_closeStatus; // weak
 static char c3mm_index[C3MM_INDEX_SIZE]; // weak
 
-static char building_67_house_ceres[__TD_TR]; // weak
-
-static char building_70_house_health[__TD_TR]; // weak
-
 static int building_74_house_taxIncomeThisYear_senateForum_treasureStore[__TD_TR]; // weak
-
-static char building_7a_desirability[__TD_TR]; // weak
-
-static char building_7c_adjacentToWater[__TD_TR]; // weak
 
 static char current_fileExtension[32];
 
@@ -1073,6 +1059,15 @@ struct Walker
 
   short word_7FA384;
   short wlk_ID_pp;
+  char migrantNumPeopleCarried;
+  char mood;
+  char byte_7FA389;
+  char byte_7FA3A3;
+  char byte_7FA370;
+  char ruler;
+  char simpleDirection;
+  char byte_7FA39A;
+  char byte_7FA3B9;
 };
 
 static const int MAX_WALKERS=1000;
@@ -1154,6 +1149,14 @@ struct Building
  char hasRoadAccess;
  char haveRoadnet;
  char house_isMerged;
+ char desirability;
+ char adjacentToWater;
+ char byte_94BD84;
+ char byte_94BD85;
+ char house_health;
+ char house_ceres;
+ char house_taxcollector;
+ char byte_94BD7D;
 };
 
 static const int MAX_BUILDINGS = 2000;
