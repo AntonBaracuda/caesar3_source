@@ -69036,11 +69036,13 @@ void  sub_4B3390(int walkerId)
     ++walkers[walkerId].progressOnTile;
     walkerAdvanceTick(walkerId);
   }
+
   if ( !walkers[walkerId].byte_7FA3B9 )
   {
     sub_4B3C20(walkerId);
     return;
   }
+
   if ( walkers[walkerId].byte_7FA3B9 == 1 )
   {
     v8 = walkers[walkerId].wlk_ID_pp;
