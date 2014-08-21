@@ -1033,7 +1033,7 @@ struct Walker
   short word_7FA374;
   short destinationpathId;
   char byte_7FA376;
-  char byte_7FA352;
+  char lastDirection;
   short word_7FA3B0;
   short wlk_ID_mm;
   short word_7FA3B4;
@@ -1068,6 +1068,12 @@ struct Walker
   char simpleDirection;
   char byte_7FA39A;
   char byte_7FA3B9;
+  char at_dest_x;
+  char at_dest_y;
+  short word_7FA3BA;
+  short word_7FA3BC;
+  char prevActionState;
+  short destinationPathCurrent;
 };
 
 static const int MAX_WALKERS=1000;
